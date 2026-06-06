@@ -1,0 +1,26 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <queries>
+        <package android:name="com.ts.MainUI" />
+        <intent>
+            <action android:name="com.ts.can.carinfo.CarInfoService" />
+        </intent>
+    </queries>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:theme="@style/AppTheme"
+        android:label="车辆数据探针"
+        android:allowBackup="true"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="landscape"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
