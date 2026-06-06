@@ -1,18 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <queries>
         <package android:name="com.ts.MainUI" />
-        <intent>
-            <action android:name="com.ts.can.carinfo.CarInfoService" />
-        </intent>
+        <intent><action android:name="com.ts.can.carinfo.CarInfoService" /></intent>
+        <intent><action android:name="com.ts.tsspeechlib.car.TsCarService" /></intent>
+        <intent><action android:name="android.intent.action.MAIN_UI" /></intent>
     </queries>
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 
     <application
         android:theme="@style/AppTheme"
-        android:label="车辆数据探针"
+        android:label="车辆数据核心Demo"
         android:allowBackup="true"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true">
         <activity
             android:name=".MainActivity"
             android:screenOrientation="landscape"

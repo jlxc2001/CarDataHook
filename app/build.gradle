@@ -1,14 +1,14 @@
 plugins { id 'com.android.application' }
 
 android {
-    namespace 'com.jlxc.vehicledataprobe'
+    namespace 'com.jlxc.vehicledatacore'
     compileSdk 35
+
     defaultConfig {
-        applicationId 'com.jlxc.vehicledataprobe'
+        applicationId 'com.jlxc.vehicledatacore'
         minSdk 23
-        targetSdk 33
+        targetSdk 28
         versionCode 1
-        versionName '0.1-test'
+        versionName '0.1.0'
     }
-    buildFeatures { aidl true }
 }
