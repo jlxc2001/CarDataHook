@@ -75,6 +75,10 @@ public class VvvfSynthEngine {
     private double smoothedAccel = 0.0;
     private double smoothedRpm = 900.0;
     private double smoothedThrottle = 0.0;
+    private volatile float displaySpeedKmh = 0f;
+    private volatile float displayRpm = 900f;
+    private volatile float displayThrottle = 0f;
+    private volatile float displayAccel = 0f;
 
     // Rail / turbine oscillator phases.
     private double motorPhase = 0.0;
@@ -186,6 +190,22 @@ public class VvvfSynthEngine {
 
     public float getTargetSpeedKmh() {
         return targetSpeedKmh;
+    }
+
+    public float getDisplaySpeedKmh() {
+        return displaySpeedKmh;
+    }
+
+    public float getDisplayRpm() {
+        return displayRpm;
+    }
+
+    public float getDisplayThrottle() {
+        return displayThrottle;
+    }
+
+    public float getDisplayAccel() {
+        return displayAccel;
     }
 
     public void setVolume(float value) {
@@ -381,6 +401,10 @@ public class VvvfSynthEngine {
             double sample = softClip(wave * amp);
             out[i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, sample * 32767.0));
         }
+        displaySpeedKmh = (float) smoothedSpeed;
+        displayRpm = (float) smoothedRpm;
+        displayThrottle = (float) smoothedThrottle;
+        displayAccel = (float) smoothedAccel;
     }
 
 

@@ -8,7 +8,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -25,12 +27,22 @@ public class VvvfSoundService extends Service {
     public static final String ACTION_SET_VOLUME = "com.jlxc.mikuvvvf.action.SET_VOLUME";
     public static final String ACTION_SET_MUTE = "com.jlxc.mikuvvvf.action.SET_MUTE";
     public static final String ACTION_SET_HOOK = "com.jlxc.mikuvvvf.action.SET_HOOK";
+    public static final String ACTION_STATUS = "com.jlxc.mikuvvvf.action.STATUS";
 
     public static final String EXTRA_SPEED = "speed";
     public static final String EXTRA_STYLE = "style";
     public static final String EXTRA_VOLUME = "volume";
     public static final String EXTRA_MUTE = "mute";
     public static final String EXTRA_HOOK_ENABLED = "hook_enabled";
+    public static final String EXTRA_STATUS_SPEED = "status_speed";
+    public static final String EXTRA_STATUS_TARGET_SPEED = "status_target_speed";
+    public static final String EXTRA_STATUS_RPM = "status_rpm";
+    public static final String EXTRA_STATUS_THROTTLE = "status_throttle";
+    public static final String EXTRA_STATUS_ACCEL = "status_accel";
+    public static final String EXTRA_STATUS_STYLE = "status_style";
+    public static final String EXTRA_STATUS_STAGE = "status_stage";
+    public static final String EXTRA_STATUS_SOURCE = "status_source";
+    public static final String EXTRA_STATUS_HOOK = "status_hook";
 
     public static final int UDP_PORT = 47230;
 
@@ -43,6 +55,13 @@ public class VvvfSoundService extends Service {
     private DatagramSocket udpSocket;
     private VehicleDataProvider vehicleDataProvider;
     private volatile String hookStatus = "Hook idle";
+    private final Handler statusHandler = new Handler(Looper.getMainLooper());
+    private final Runnable statusRunnable = new Runnable() {
+        @Override public void run() {
+            broadcastStatus();
+            statusHandler.postDelayed(this, 250);
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -66,6 +85,8 @@ public class VvvfSoundService extends Service {
         startForeground(NOTIFICATION_ID, buildNotification("Ready · Hook ON 500ms · UDP " + UDP_PORT + " · " + engine.getSampleVvvfStatus()));
         startUdpServer();
         engine.start();
+        statusHandler.removeCallbacks(statusRunnable);
+        statusHandler.post(statusRunnable);
     }
 
     @Override
@@ -110,6 +131,7 @@ public class VvvfSoundService extends Service {
 
     @Override
     public void onDestroy() {
+        statusHandler.removeCallbacks(statusRunnable);
         stopUdpServer();
         if (vehicleDataProvider != null) {
             vehicleDataProvider.stop();
@@ -120,6 +142,7 @@ public class VvvfSoundService extends Service {
     }
 
     private void stopSelfSafely() {
+        statusHandler.removeCallbacks(statusRunnable);
         stopUdpServer();
         if (vehicleDataProvider != null) {
             vehicleDataProvider.stop();
@@ -275,11 +298,27 @@ public class VvvfSoundService extends Service {
                 : new Notification.Builder(this);
         return builder
                 .setSmallIcon(R.drawable.ic_stat_vvvf)
-                .setContentTitle("Miku VVVF Sample / Engine Sound")
+                .setContentTitle("Miku VVVF Fighter HUD")
                 .setContentText(text)
                 .setContentIntent(pi)
                 .setOngoing(true)
                 .build();
+    }
+
+    private void broadcastStatus() {
+        if (engine == null) return;
+        Intent i = new Intent(ACTION_STATUS);
+        i.setPackage(getPackageName());
+        i.putExtra(EXTRA_STATUS_SPEED, engine.getDisplaySpeedKmh());
+        i.putExtra(EXTRA_STATUS_TARGET_SPEED, engine.getTargetSpeedKmh());
+        i.putExtra(EXTRA_STATUS_RPM, engine.getDisplayRpm());
+        i.putExtra(EXTRA_STATUS_THROTTLE, engine.getDisplayThrottle());
+        i.putExtra(EXTRA_STATUS_ACCEL, engine.getDisplayAccel());
+        i.putExtra(EXTRA_STATUS_STYLE, engine.getStyle().name());
+        i.putExtra(EXTRA_STATUS_STAGE, engine.getStageName());
+        i.putExtra(EXTRA_STATUS_SOURCE, engine.getInputSourceName());
+        i.putExtra(EXTRA_STATUS_HOOK, hookStatus);
+        sendBroadcast(i);
     }
 
     private void updateNotification() {
